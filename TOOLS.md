@@ -79,8 +79,11 @@ read_data_from_excel(
 - `start_cell`: Starting cell (default: "A1")
 - `end_cell`: Optional ending cell to bound width/height
 - `row_limit`: Optional number of rows to return starting from `start_cell`
+- Hard cap: A single call returns at most `50` rows.
 - Returns: Minified JSON string:
   - `{"range":"A1:H10","sheet_name":"Model_Map","cells":[{"A1":"Path","B1":"BlockType"}, ...]}`
+  - If request exceeds 50 rows, response is auto-truncated and includes:
+    `{"truncated":true,"max_rows_per_call":50,"message":"Maximum rows per call is 50. Result was truncated. Make multiple calls to read additional rows.","next_start_cell":"A51"}`
 
 Example:
 
@@ -90,5 +93,16 @@ read_data_from_excel(
     sheet_name="Model_Map",
     start_cell="A1",
     row_limit=10
+)
+```
+
+Pagination example (follow-up call after truncation):
+
+```python
+read_data_from_excel(
+    filepath="D:\\00_work\\00_BTC\\btc-agent\\Traceability_KB.xlsx",
+    sheet_name="Model_Map",
+    start_cell="A51",
+    row_limit=50
 )
 ```

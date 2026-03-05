@@ -11,6 +11,7 @@ from .cell_utils import parse_cell_range
 from .cell_validation import get_data_validation_for_cell
 
 logger = logging.getLogger(__name__)
+MAX_READ_ROWS_PER_CALL = 50
 
 def read_excel_range(
     filepath: Path | str,
@@ -170,6 +171,11 @@ def read_excel_range_as_row_maps(
         if end_col < start_col:
             raise DataError("end column cannot be before start column")
 
+        requested_row_count = end_row - start_row + 1
+        truncated = requested_row_count > MAX_READ_ROWS_PER_CALL
+        if truncated:
+            end_row = start_row + MAX_READ_ROWS_PER_CALL - 1
+
         range_str = f"{get_column_letter(start_col)}{start_row}:{get_column_letter(end_col)}{end_row}"
         rows: List[Dict[str, Any]] = []
         for row in range(start_row, end_row + 1):
@@ -180,7 +186,19 @@ def read_excel_range_as_row_maps(
             rows.append(row_map)
 
         wb.close()
-        return {"range": range_str, "sheet_name": sheet_name, "cells": rows}
+        result: Dict[str, Any] = {"range": range_str, "sheet_name": sheet_name, "cells": rows}
+        if truncated:
+            result["truncated"] = True
+            result["max_rows_per_call"] = MAX_READ_ROWS_PER_CALL
+            result["message"] = (
+                "Maximum rows per call is 50. Result was truncated. "
+                "Make multiple calls to read additional rows."
+            )
+            result["next_start_cell"] = (
+                f"{get_column_letter(start_col)}{start_row + MAX_READ_ROWS_PER_CALL}"
+            )
+
+        return result
     except DataError as e:
         logger.error(str(e))
         raise

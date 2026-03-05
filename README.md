@@ -108,6 +108,12 @@ The server exposes workbook and data tools only. See [TOOLS.md](TOOLS.md) for co
 {"range":"A1:H10","sheet_name":"Model_Map","cells":[{"A1":"Path","B1":"BlockType"},{"A2":"DDD_test","B2":null}]}
 ```
 
+`read_data_from_excel` has a hard cap of `50` rows per call. When more rows are requested, the result is auto-truncated and includes pagination guidance:
+
+```json
+{"range":"A1:B50","sheet_name":"Model_Map","cells":[...],"truncated":true,"max_rows_per_call":50,"message":"Maximum rows per call is 50. Result was truncated. Make multiple calls to read additional rows.","next_start_cell":"A51"}
+```
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=haris-musa/excel-mcp-server&type=Date)](https://www.star-history.com/#haris-musa/excel-mcp-server&Date)

@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="https://raw.githubusercontent.com/haris-musa/excel-mcp-server/main/assets/logo.png" alt="Excel MCP Server Logo" width="300"/>
 </p>
 
@@ -12,16 +12,11 @@ A Model Context Protocol (MCP) server that lets you manipulate Excel files witho
 
 ## Features
 
-- 📊 **Excel Operations**: Create, read, update workbooks and worksheets
-- 📈 **Data Manipulation**: Formulas, formatting, charts, pivot tables, and Excel tables
-- 🔍 **Data Validation**: Built-in validation for ranges, formulas, and data integrity
-- 🎨 **Formatting**: Font styling, colors, borders, alignment, and conditional formatting
-- 📋 **Table Operations**: Create and manage Excel tables with custom styling
-- 📊 **Chart Creation**: Generate various chart types (line, bar, pie, scatter, etc.)
-- 🔄 **Pivot Tables**: Create dynamic pivot tables for data analysis
-- 🔧 **Sheet Management**: Copy, rename, delete worksheets with ease
-- 🔌 **Triple transport support**: stdio, SSE (deprecated), and streamable HTTP
-- 🌐 **Remote & Local**: Works both locally and as a remote service
+- **Workbook Operations**: Create workbooks, create worksheets, and read workbook metadata
+- **Data Operations**: Read and write worksheet cell data
+- **Compact Read Output**: Minified JSON with `range`, `sheet_name`, and per-row cell maps to reduce token usage
+- **Triple transport support**: stdio, SSE (deprecated), and streamable HTTP
+- **Remote & Local**: Works both locally and as a remote service
 
 ## Usage
 
@@ -103,7 +98,15 @@ When using the **stdio protocol**, the file path is provided with each tool call
 
 ## Available Tools
 
-The server provides a comprehensive set of Excel manipulation tools. See [TOOLS.md](TOOLS.md) for complete documentation of all available tools.
+The server exposes workbook and data tools only. See [TOOLS.md](TOOLS.md) for complete documentation.
+
+### Compact Read Response
+
+`read_data_from_excel` returns a compact minified JSON payload that keeps range/sheet context and cell coordinates while reducing token usage:
+
+```json
+{"range":"A1:H10","sheet_name":"Model_Map","cells":[{"A1":"Path","B1":"BlockType"},{"A2":"DDD_test","B2":null}]}
+```
 
 ## Star History
 
@@ -112,3 +115,4 @@ The server provides a comprehensive set of Excel manipulation tools. See [TOOLS.
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
+

@@ -89,6 +89,105 @@ def read_excel_range(
         logger.error(f"Failed to read Excel range: {e}")
         raise DataError(str(e))
 
+def read_excel_range_as_row_maps(
+    filepath: Path | str,
+    sheet_name: str,
+    start_cell: str = "A1",
+    end_cell: Optional[str] = None,
+    row_limit: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Read a rectangular range and return one address->value map per row.
+
+    Response shape:
+    {
+      "range": "A1:C3",
+      "sheet_name": "Sheet1",
+      "cells": [
+        {"A1": "x", "B1": None, "C1": 10},
+        {"A2": ...}
+      ]
+    }
+    """
+    try:
+        wb = load_workbook(filepath, read_only=False)
+
+        if sheet_name not in wb.sheetnames:
+            raise DataError(f"Sheet '{sheet_name}' not found")
+
+        ws = wb[sheet_name]
+
+        # Parse start cell
+        if ":" in start_cell:
+            start_cell, end_cell = start_cell.split(":")
+
+        try:
+            start_coords = parse_cell_range(f"{start_cell}:{start_cell}")
+            if not start_coords or not all(coord is not None for coord in start_coords[:2]):
+                raise DataError(f"Invalid start cell reference: {start_cell}")
+            start_row, start_col = start_coords[0], start_coords[1]
+        except ValueError as e:
+            raise DataError(f"Invalid start cell format: {str(e)}")
+
+        # Resolve the range bounds.
+        if end_cell:
+            try:
+                end_coords = parse_cell_range(f"{end_cell}:{end_cell}")
+                if not end_coords or not all(coord is not None for coord in end_coords[:2]):
+                    raise DataError(f"Invalid end cell reference: {end_cell}")
+                requested_end_row, requested_end_col = end_coords[0], end_coords[1]
+            except ValueError as e:
+                raise DataError(f"Invalid end cell format: {str(e)}")
+            end_col = requested_end_col
+        else:
+            end_col = ws.max_column
+            requested_end_row = None
+
+        if row_limit is not None:
+            if row_limit <= 0:
+                raise DataError("row_limit must be greater than 0")
+            end_row = start_row + row_limit - 1
+        elif requested_end_row is not None:
+            end_row = requested_end_row
+        else:
+            end_row = ws.max_row
+
+        # Handle empty sheet and out-of-bounds starts consistently.
+        if ws.max_row == 1 and ws.max_column == 1 and ws.cell(1, 1).value is None:
+            end_row = start_row
+            end_col = start_col
+        elif start_row > ws.max_row or start_col > ws.max_column:
+            logger.warning(
+                f"Start cell {start_cell} is outside the sheet's data boundary "
+                f"({get_column_letter(ws.min_column)}{ws.min_row}:{get_column_letter(ws.max_column)}{ws.max_row}). "
+                f"No data will be read."
+            )
+            range_str = f"{get_column_letter(start_col)}{start_row}:{get_column_letter(start_col)}{start_row}"
+            wb.close()
+            return {"range": range_str, "sheet_name": sheet_name, "cells": []}
+
+        if end_row < start_row:
+            raise DataError("end row cannot be before start row")
+        if end_col < start_col:
+            raise DataError("end column cannot be before start column")
+
+        range_str = f"{get_column_letter(start_col)}{start_row}:{get_column_letter(end_col)}{end_row}"
+        rows: List[Dict[str, Any]] = []
+        for row in range(start_row, end_row + 1):
+            row_map: Dict[str, Any] = {}
+            for col in range(start_col, end_col + 1):
+                address = f"{get_column_letter(col)}{row}"
+                row_map[address] = ws.cell(row=row, column=col).value
+            rows.append(row_map)
+
+        wb.close()
+        return {"range": range_str, "sheet_name": sheet_name, "cells": rows}
+    except DataError as e:
+        logger.error(str(e))
+        raise
+    except Exception as e:
+        logger.error(f"Failed to read Excel range as row maps: {e}")
+        raise DataError(str(e))
+
 def write_data(
     filepath: str,
     sheet_name: Optional[str],

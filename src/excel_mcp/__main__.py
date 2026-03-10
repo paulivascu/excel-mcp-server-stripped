@@ -1,6 +1,6 @@
 import typer
 
-from .server import run_sse, run_stdio, run_streamable_http
+from excel_mcp.server import run_sse, run_stdio, run_streamable_http
 
 app = typer.Typer(help="Excel MCP Server")
 

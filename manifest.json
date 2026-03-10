@@ -1,26 +1,26 @@
 {
   "manifest_version": "0.3",
-  "name": "excel-mcp-server",
-  "version": "0.1.7",
+  "name": "excel-mcp-server-stripped",
+  "version": "0.1.9",
   "description": "A Model Context Protocol server for Excel file manipulation",
   "author": {
-    "name": "haris",
-    "url": "https://github.com/haris-musa"
+    "name": "Paul Ivascu",
+    "url": "https://github.com/paulivascu"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/haris-musa/excel-mcp-server"
+    "url": "https://github.com/paulivascu/excel-mcp-server-stripped"
   },
-  "homepage": "https://github.com/haris-musa/excel-mcp-server",
-  "documentation": "https://github.com/haris-musa/excel-mcp-server#readme",
-  "support": "https://github.com/haris-musa/excel-mcp-server/issues",
+  "homepage": "https://github.com/paulivascu/excel-mcp-server-stripped",
+  "documentation": "https://github.com/paulivascu/excel-mcp-server-stripped#readme",
+  "support": "https://github.com/paulivascu/excel-mcp-server-stripped/issues",
   "icon": "icon.png",
   "server": {
     "type": "python",
     "entry_point": "src/excel_mcp/__main__.py",
     "mcp_config": {
       "command": "uvx",
-      "args": ["excel-mcp-server", "stdio"]
+      "args": ["excel-mcp-server-stripped", "stdio"]
     }
   },
   "tools": [

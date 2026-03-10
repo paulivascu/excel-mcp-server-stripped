@@ -1,4 +1,6 @@
 .venv/
+.build-venv/
+build/
 dist/
 excel_files/
 __pycache__/

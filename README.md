@@ -100,6 +100,8 @@ When using the **stdio protocol**, the file path is provided with each tool call
 
 The server exposes workbook and data tools only. See [TOOLS.md](TOOLS.md) for complete documentation.
 
+For `write_data_to_excel`, `data` must be a plain 2D array of scalar cell values such as `[['ID', 'Value1'], [1, 56]]`. Do not wrap cells in objects like `{"value":"ID"}`.
+
 ### Compact Read Response
 
 `read_data_from_excel` returns a compact minified JSON payload that keeps range/sheet context and cell coordinates while reducing token usage:

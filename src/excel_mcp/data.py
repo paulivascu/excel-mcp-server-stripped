@@ -275,14 +275,46 @@ def _write_data_to_worksheet(
 
         # Write data
         for i, row in enumerate(data):
+            if not isinstance(row, (list, tuple)):
+                raise DataError(
+                    "Each row in data must be a list of plain cell values. "
+                    "Example: [[\"ID\", \"Value1\"], [1, 56]]"
+                )
             for j, val in enumerate(row):
-                worksheet.cell(row=start_row + i, column=start_col + j, value=val)
+                worksheet.cell(
+                    row=start_row + i,
+                    column=start_col + j,
+                    value=_normalize_excel_cell_value(val),
+                )
     except DataError as e:
         logger.error(str(e))
         raise
     except Exception as e:
         logger.error(f"Failed to write worksheet data: {e}")
         raise DataError(str(e))
+
+
+def _normalize_excel_cell_value(value: Any) -> Any:
+    """Normalize common model-generated wrappers into plain Excel scalars."""
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+
+    if isinstance(value, dict):
+        if len(value) == 1:
+            (_, inner_value), = value.items()
+            return _normalize_excel_cell_value(inner_value)
+        raise DataError(
+            "Cell values must be plain scalars, not objects. "
+            "Use values like \"ID\" or 1, not maps like {\"value\": \"ID\"}."
+        )
+
+    if isinstance(value, (list, tuple)):
+        raise DataError(
+            "Nested arrays are not valid cell values. "
+            "Pass a 2D array of rows, for example [[\"ID\", \"Value1\"], [1, 56]]."
+        )
+
+    return value
 
 def read_excel_range_with_metadata(
     filepath: Path | str,

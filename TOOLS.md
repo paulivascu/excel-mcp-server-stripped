@@ -56,9 +56,18 @@ write_data_to_excel(
 
 - `filepath`: Path to Excel file
 - `sheet_name`: Target worksheet name
-- `data`: List of rows to write
+- `data`: List of rows to write. Each cell must be a plain scalar value (`string`, `number`, `boolean`, or `null`), not an object like `{"value":"ID"}`.
 - `start_cell`: Starting cell (default: "A1")
 - Returns: Success message
+
+Example:
+
+```json
+[
+  ["ID", "Value1", "Value2"],
+  [1, 56, 12]
+]
+```
 
 ### read_data_from_excel
 

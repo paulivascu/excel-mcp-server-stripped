@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
@@ -32,6 +32,9 @@ mcp = FastMCP(
     port=int(os.environ.get("FASTMCP_PORT", "8017")),
     instructions="Excel MCP Server for workbook and data operations",
 )
+
+ExcelCellValue = Optional[Union[str, int, float, bool]]
+ExcelTableData = List[List[ExcelCellValue]]
 
 
 def get_excel_path(filename: str) -> str:
@@ -92,10 +95,21 @@ def read_data_from_excel(
 def write_data_to_excel(
     filepath: str,
     sheet_name: str,
-    data: List[List],
+    data: ExcelTableData,
     start_cell: str = "A1",
 ) -> str:
-    """Write data to Excel worksheet."""
+    """Write a 2D array of plain scalar cell values to Excel.
+
+    `data` must be an array of rows, where each cell is a string, number,
+    boolean, or null. Do not wrap cell values in objects like
+    `{"value":"ID"}`.
+
+    Example:
+    [
+      ["ID", "Value1", "Value2"],
+      [1, 56, 12]
+    ]
+    """
     try:
         full_path = get_excel_path(filepath)
         result = write_data(full_path, sheet_name, data, start_cell)

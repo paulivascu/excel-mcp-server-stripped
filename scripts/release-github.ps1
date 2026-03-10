@@ -106,7 +106,7 @@ if ($LASTEXITCODE -ne 0) {
     Fail "Failed to push tag $tag to origin."
 }
 
-gh release view $tag *> $null
+cmd /c "gh release view $tag >nul 2>&1"
 if ($LASTEXITCODE -eq 0) {
     Fail "A GitHub release for $tag already exists."
 }
